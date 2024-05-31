@@ -1233,8 +1233,11 @@ class VectorLayoutInferer {
               res_shape[res_shape.size() - 1] &&
           src_ty.getDimSize(src_ty.getRank() - 2) % layout.tiling()[0] == 0 &&
           res_shape[res_shape.size() - 2] % layout.tiling()[0] == 0) {
-        layout = VectorLayout(layout.bitwidth(), {0, 0}, layout.tiling(),
-                              layout.implicit_dim());
+        // TODO(b/343808585): We shouldn't force sublane offset to 0 when
+        //                    unfolding, it's still a no-op, but we need to add
+        //                    support in apply-vector-layout.
+        layout = VectorLayout(layout.bitwidth(), {0, layout.offsets()[1]},
+                              layout.tiling(), layout.implicit_dim());
         setLayout(op, layout, layout);
         return success();
       }
